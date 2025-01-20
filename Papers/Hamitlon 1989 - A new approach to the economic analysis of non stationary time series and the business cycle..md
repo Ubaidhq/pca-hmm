@@ -1,0 +1,4 @@
+- This paper proposes a very tractable approach to modelling changes in regime.  
+- The parameters of an autoregression are viewed as the outcome of a discrete-state Markov process.  For example, the mean growth rate of a non stationary series may be subject to occasional, discrete shifts.  
+- An empirical application of this technique to postwar U.S real GNP suggests that the periodic shift from a positive growth rate to a negative growth rate is a recurrent feature of the U.S business cycle, and indeed could be used as an objective criterion for defining and measuring economic recessions.
+- The estimated paramater values suggest that a typical economic recession is a ssociated with a 3% poermanent drop in the level of GNP.  

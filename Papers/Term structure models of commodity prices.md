@@ -1,0 +1,7 @@
+- Provides useful informaton for hedging or ivnestment decision because it synthesizes the information available in the market and operator's expectations concerning the future.  
+- Keynes 1930 - In normal conditions, the spot price exceeds the forward price i.e there is backwardation.  In other words, the normal supply price on the spot icnludes renumeration for the risk of price fluctiation during the period of production, whilst the forward price excludes this.  
+- Keynes introduced theory of backwardation.
+- Keynes (1930) and Cootner (1960) put forward the idea that commodity futures prices depend on the net positions of hedgers.
+	- This can be viewed as a form of insurance - producers and consumer of the underlying commodity transfer the risk of price fluctuation to speculators.  
+- The main idea behind the theroy of Keynes and Cootner - futures prices depend on the net positions o fhedgers.
+- 

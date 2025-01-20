@@ -1,0 +1,3 @@
+- Current regime switching models are not suitable for capturing instability of dyanmics because they assume a finite number of states and that the future is like the past.
+- Structural break models allow the dynamics to chance over time, howeverm they may incur a loss in the stimation precision because past states cannot recur.
+- In contrast to regime switching models, structural break models can capture dynamic instability by assuming an infinite or much larger number of states at the cost of extra restrictions.    

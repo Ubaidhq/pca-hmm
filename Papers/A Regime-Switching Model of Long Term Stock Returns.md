@@ -1,0 +1,3 @@
+- The regime-switching lognormal model captures observed stock return behaviour, in particular ex-treme observations such as October 1987, and volatility clustering. 
+- Statistically, the RSLN model provides a significantly better fit to the S&P data than other popular models and the two regime version of the mdoel appears to be sufficient.  
+- The RSLN model is mathematically tractable, it is possible to calculate the distribution and density function accurately.  

@@ -1,0 +1,5 @@
+- There is a big difference in how we want to handle commodity futures and applying PCA or some other derived variable like the slope.  
+- The issue is that not all commodities are marked for the same months or more importantly the same number of months.
+- Say for CC and C, if they are marked for a different number of months, when we are looking at the slope you are not comparing like for like.
+- The thing is we are no longer just using slope as a variable, we are instead using the principle components, but we are taking averages over various ag commodities?  Let's just pick one commodity for now and see what we can produce. 
+- so for CC, we want to make sure that we have double the number of contracts that are marked, so we have two of each otherwise those otherones will perhaps have more weighting.

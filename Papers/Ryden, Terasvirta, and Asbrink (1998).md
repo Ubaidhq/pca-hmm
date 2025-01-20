@@ -1,0 +1,2 @@
+- The conditional heteroskedasticity portion of ARCH simply refers to the observable fact that volatility in financial markets is nonconstant—all financial data, whether stock market values, oil prices, exchange rates, or GDP, go through periods of high and low volatility. Economists have always known the amount of volatility changes, but they often kept it constant for a given period because they lacked a better option when modeling markets.
+- 

@@ -1,0 +1,14 @@
+- What even is duration dependence? 
+	- The state transition probability matrix are now funcitons of both the inferred current state as well as the *duration* of time within the state. 
+	- Because any affects of long lags of the Markov states are summarized by the inferred duration variable, this structure epxloits information cocerning state termporal dependence but is much more parsimonious than an unrestricted higher order Markov process.
+	- It may be usedful to note that our model is a particualr paramerisiation of a semi-Markov process. 
+	- [[Lam 1990]] - In Lam's algorithm, dependence of GNP levels on all past lags of Markov states is captured by an additional Markovian satate variable, which si the sum of past Markov states sinc ethe beginning of the sample.
+	- There have been various other extensions to Hamiltons (1989) cosntant-transition proabilities
+		- [[Diebold et al, Filardo 1992]] - allowing observable economic fundamentals or
+		- [[Ghyseks 1992]] - seasonal indicators to
+	- to affect the state transition probabilties.  
+	- Allowing regime switches between two states for the mean growth rate, sas in the work of Hamilton (1989), our results provide evidence in support of asymmetry between contractions and expansions.
+	- This can be observed by the difference in the transition probabilties between the states and strong evidence of duration dependence associatied with post-war recessions but not for expansions.  
+	- [[Diebold et al, Filardo 1992]] allowed the state transition probabilities to evolve as logitistic functions of observable economic fundamentals, whereas
+	- [[Ghyseks 1992]] conditioned on seasonal indicators.
+	- Empirical results find that the probability of switching out of a state declines with the duration in that state.  

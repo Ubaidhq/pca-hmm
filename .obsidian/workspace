@@ -1,0 +1,103 @@
+{
+  "main": {
+    "id": "cacd77c7d2b1c91e",
+    "type": "split",
+    "children": [
+      {
+        "id": "ce404faa6d459c06",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Sections/Conclusion.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "abfaed1fb6fd52e5",
+    "type": "split",
+    "children": [
+      {
+        "id": "6383762512850abd",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7dde75df826b70a3",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "fa52c91845175811",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 311
+  },
+  "right": {
+    "id": "29d9fa5f0dce38fa",
+    "type": "split",
+    "children": [
+      {
+        "id": "8a6600a0fd7c813c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "49d11bc885bfe24b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Sections/Conclusion.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "ce404faa6d459c06",
+  "lastOpenFiles": [
+    "Sections/Conclusion.md",
+    "Sections/Abstract.md",
+    "Sections/Methodology/AIC and BIC.md",
+    "Sections/Methodology/Code.md",
+    "Sections/Methodology/Deciding on the number of states.md",
+    "Sections/Methodology/Plots.md",
+    "Sections/Methodology/Hidden Markov Model.md",
+    "Sections/Methodology/Model Performance Metrics.md",
+    "Sections/Methodology/Strategy.md",
+    "Sections/Methodology/Data.md"
+  ]
+}
