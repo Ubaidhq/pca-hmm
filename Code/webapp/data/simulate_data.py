@@ -153,12 +153,18 @@ def get_front_contracts(date, df, n_contracts=10):
 
 def get_forward_curves(df, dates):
     """Get forward curves for a list of dates."""
+    if isinstance(dates, (pd.Timestamp, str)):
+        dates = [pd.Timestamp(dates)]
+    elif isinstance(dates, tuple):
+        start_date, end_date = dates
+        dates = pd.date_range(start=start_date, end=end_date, freq='B')
+    
     curves = {}
     for date in dates:
         if date in df.index:
             front_contracts = get_front_contracts(df=df, date=date)
-            if len(front_contracts) > 0:  # Check if we have any contracts
-                curves[date] = df.loc[date, front_contracts]
+            if front_contracts:  # Check if we have any contracts
+                curves[date] = pd.Series(df.loc[date, front_contracts])
     return curves
 
 # Add this for debugging
