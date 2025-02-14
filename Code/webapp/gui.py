@@ -8,6 +8,7 @@ import numpy as np
 from hmmlearn import hmm
 from sklearn.preprocessing import StandardScaler
 from scipy.stats import norm
+from sklearn.decomposition import PCA
 
 # Initialize Dash app
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
@@ -162,7 +163,42 @@ app.layout = html.Div([
                     ]),
                 ]),
         
-        # Additional tabs can be added here
+        # PCA Analysis Tab
+        dcc.Tab(label='PCA Analysis', value='pca-tab',
+                style=TAB_STYLE, selected_style=TAB_SELECTED_STYLE,
+                children=[
+                    html.Div([
+                        html.H3("Principal Component Analysis"),
+                        
+                        # Overall PCA
+                        html.Div([
+                            html.H4("Overall PCA"),
+                            dcc.Graph(id='pca-components-plot'),
+                        ], style={'margin-bottom': '40px'}),
+                        
+                        # PCA by Regime
+                        html.Div([
+                            html.H4("PCA by Regime"),
+                            
+                            # Number of states selector
+                            html.Div([
+                                html.Label("Number of States:", style={'font-weight': 'bold'}),
+                                dcc.Slider(
+                                    id='pca-regime-states',
+                                    min=2,
+                                    max=4,
+                                    value=3,
+                                    marks={i: str(i) for i in range(2, 5)},
+                                    step=1
+                                ),
+                            ], style=CONTROL_STYLE),
+                            
+                            # Graphs for regime-specific PCA
+                            dcc.Graph(id='pca-by-regime-plot'),
+                            dcc.Graph(id='pca-loadings-plot')
+                        ])
+                    ])
+                ]),
     ]),
     
     # Hidden div for storing the data
@@ -322,13 +358,10 @@ def update_regime_plot(stored_data, n_states):
     continuous_series = pd.Series(index=df.index, dtype=float)
     
     for date in df.index:
-        # Get non-NaN values for this date
         available_values = df.loc[date].dropna()
         if len(available_values) > 0:
-            # Use the first available contract (front month)
             continuous_series[date] = available_values.iloc[0]
     
-    # Remove any NaN values
     continuous_series = continuous_series.dropna()
     
     # Calculate log returns
@@ -362,6 +395,11 @@ def update_regime_plot(stored_data, n_states):
     
     # Add colored markers for different regimes
     colors = px.colors.qualitative.Set1[:n_states]
+    
+    # Calculate state statistics
+    total_points = len(states)
+    state_stats = []
+    
     for state in range(n_states):
         state_mask = states == state
         
@@ -369,10 +407,17 @@ def update_regime_plot(stored_data, n_states):
         state_dates = log_returns.index[state_mask]
         state_prices = continuous_series.loc[state_dates]
         
+        # Calculate percentage of points in this state
+        state_count = np.sum(state_mask)
+        state_percentage = (state_count / total_points) * 100
+        
+        # Store statistics
+        state_stats.append(f"State {state}: {state_count} points ({state_percentage:.1f}%)")
+        
         fig.add_trace(go.Scatter(
             x=state_dates,
             y=state_prices,
-            name=f'State {state}',
+            name=f'State {state} ({state_count} pts, {state_percentage:.1f}%)',
             mode='markers',
             marker=dict(
                 size=6,
@@ -384,7 +429,7 @@ def update_regime_plot(stored_data, n_states):
     
     # Update layout
     fig.update_layout(
-        title="Price Series with HMM Regimes",
+        title="Price Series with HMM Regimes",  # Simplified title
         xaxis_title="Date",
         yaxis_title="Price ($)",
         hovermode='x unified',
@@ -396,7 +441,7 @@ def update_regime_plot(stored_data, n_states):
             xanchor="left",
             x=0.01
         ),
-        margin=dict(l=50, r=50, t=50, b=50)
+        margin=dict(l=50, r=50, t=50, b=50)  # Reduced top margin back to original
     )
     
     return fig
@@ -476,6 +521,210 @@ def update_state_dist_plot(stored_data, n_states):
     )
     
     return fig
+
+@app.callback(
+    Output('pca-components-plot', 'figure'),
+    Input('stored-data', 'children')
+)
+def update_pca_plot(stored_data):
+    df = pd.read_json(stored_data)
+    df.index = pd.to_datetime(df.index)
+    
+    # Prepare data for PCA
+    continuous_series = []
+    all_dates = df.index.unique()
+    
+    for date in all_dates:
+        row = df.loc[date].dropna()
+        if len(row) >= 5:  # Ensure we have at least 5 contracts
+            # Sort contracts by their expiry
+            contracts = []
+            for contract in row.index:
+                month = contract[0]
+                year = int('20' + contract[1:]) if len(contract) > 1 else 2000
+                month_num = {'H': 3, 'K': 5, 'N': 7, 'U': 9, 'Z': 12}[month]
+                expiry = pd.Timestamp(f'{year}-{month_num:02d}-15')
+                contracts.append((contract, expiry))
+            
+            # Sort by expiry and take first 5 contracts
+            sorted_contracts = sorted(contracts, key=lambda x: x[1])[:5]
+            contract_values = [row[contract[0]] for contract in sorted_contracts]
+            
+            if len(contract_values) == 5:  # Ensure we have exactly 5 contracts
+                continuous_series.append(contract_values)
+    
+    # Convert to numpy array
+    X = np.array(continuous_series)
+    
+    # Standardize the data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # Perform PCA
+    pca = PCA()
+    pca.fit(X_scaled)
+    
+    # Calculate variances
+    cumulative_variance = np.cumsum(pca.explained_variance_ratio_) * 100
+    individual_variance = pca.explained_variance_ratio_ * 100
+    
+    # Create figure
+    fig = go.Figure()
+    
+    # Add bar plot for individual variance
+    fig.add_trace(go.Bar(
+        x=['PC1', 'PC2', 'PC3', 'PC4', 'PC5'],
+        y=individual_variance,
+        name='Individual Explained Variance',
+        hovertemplate='%{x}<br>Variance: %{y:.1f}%'
+    ))
+    
+    # Add cumulative line on secondary y-axis
+    fig.add_trace(go.Scatter(
+        x=['PC1', 'PC2', 'PC3', 'PC4', 'PC5'],
+        y=cumulative_variance,
+        name='Cumulative Variance',
+        yaxis='y2',
+        line=dict(color='red'),
+        hovertemplate='%{x}<br>Cumulative: %{y:.1f}%'
+    ))
+    
+    fig.update_layout(
+        title="Explained Variance per Principal Component",
+        xaxis_title="Principal Component",
+        yaxis_title="Individual Explained Variance (%)",
+        yaxis2=dict(
+            title="Cumulative Explained Variance (%)",
+            overlaying='y',
+            side='right',
+            range=[0, 100]
+        ),
+        height=600,  # Increased height since it's the only plot
+        showlegend=True,
+        yaxis=dict(range=[0, max(individual_variance) * 1.1]),
+        hovermode='x unified',
+        bargap=0.3,
+        plot_bgcolor='white',
+        xaxis_gridcolor='lightgrey',
+        yaxis_gridcolor='lightgrey'
+    )
+    
+    return fig
+
+@app.callback(
+    [Output('pca-by-regime-plot', 'figure'),
+     Output('pca-loadings-plot', 'figure')],
+    [Input('stored-data', 'children'),
+     Input('pca-regime-states', 'value')]
+)
+def update_regime_pca_plots(stored_data, n_states):
+    df = pd.read_json(stored_data)
+    df.index = pd.to_datetime(df.index)
+    
+    # First, identify regimes using HMM
+    continuous_series = pd.Series(index=df.index, dtype=float)
+    for date in df.index:
+        available_values = df.loc[date].dropna()
+        if len(available_values) > 0:
+            continuous_series[date] = available_values.iloc[0]
+    
+    continuous_series = continuous_series.dropna()
+    log_returns = np.log(continuous_series / continuous_series.shift(1)).dropna()
+    
+    # Fit HMM
+    X_returns = StandardScaler().fit_transform(log_returns.values.reshape(-1, 1))
+    hmm_model = hmm.GaussianHMM(n_components=n_states, covariance_type="full", 
+                               n_iter=1000, random_state=42)
+    hmm_model.fit(X_returns)
+    states = hmm_model.predict(X_returns)
+    
+    # Create state-date mapping
+    state_dates = pd.Series(states, index=log_returns.index)
+    
+    # Prepare data for PCA by regime
+    regime_pca_results = {}
+    regime_loadings = {}
+    
+    for state in range(n_states):
+        # Get dates for this regime
+        regime_dates = state_dates[state_dates == state].index
+        
+        # Prepare term structure data for these dates
+        term_structures = []
+        for date in regime_dates:
+            if date in df.index:
+                row = df.loc[date].dropna()
+                if len(row) >= 5:
+                    contracts = []
+                    for contract in row.index:
+                        month = contract[0]
+                        year = int('20' + contract[1:]) if len(contract) > 1 else 2000
+                        month_num = {'H': 3, 'K': 5, 'N': 7, 'U': 9, 'Z': 12}[month]
+                        expiry = pd.Timestamp(f'{year}-{month_num:02d}-15')
+                        contracts.append((contract, expiry))
+                    
+                    sorted_contracts = sorted(contracts, key=lambda x: x[1])[:5]
+                    contract_values = [row[contract[0]] for contract in sorted_contracts]
+                    
+                    if len(contract_values) == 5:
+                        term_structures.append(contract_values)
+        
+        if term_structures:
+            # Perform PCA for this regime
+            X = StandardScaler().fit_transform(np.array(term_structures))
+            pca = PCA()
+            pca.fit(X)
+            
+            regime_pca_results[state] = pca.explained_variance_ratio_ * 100
+            regime_loadings[state] = pca.components_
+    
+    # Create figure for explained variance by regime
+    variance_fig = go.Figure()
+    
+    for state in regime_pca_results:
+        variance_fig.add_trace(go.Bar(
+            x=['PC1', 'PC2', 'PC3', 'PC4', 'PC5'],
+            y=regime_pca_results[state],
+            name=f'State {state}',
+            hovertemplate='%{x}<br>Variance: %{y:.1f}%'
+        ))
+    
+    variance_fig.update_layout(
+        title="Explained Variance by Regime",
+        xaxis_title="Principal Component",
+        yaxis_title="Explained Variance (%)",
+        barmode='group',
+        height=500,
+        showlegend=True,
+        plot_bgcolor='white',
+        xaxis_gridcolor='lightgrey',
+        yaxis_gridcolor='lightgrey'
+    )
+    
+    # Create figure for loadings comparison
+    loadings_fig = go.Figure()
+    
+    contract_labels = ['M1', 'M2', 'M3', 'M4', 'M5']
+    for state in regime_loadings:
+        loadings_fig.add_trace(go.Scatter(
+            x=contract_labels,
+            y=regime_loadings[state][0],  # First principal component
+            name=f'State {state}',
+            mode='lines+markers'
+        ))
+    
+    loadings_fig.update_layout(
+        title="First Principal Component Loadings by Regime",
+        xaxis_title="Contract Month",
+        yaxis_title="Loading",
+        height=500,
+        showlegend=True,
+        plot_bgcolor='white',
+        xaxis_gridcolor='lightgrey',
+        yaxis_gridcolor='lightgrey'
+    )
+    
+    return variance_fig, loadings_fig
 
 # Run the app
 if __name__ == '__main__':
